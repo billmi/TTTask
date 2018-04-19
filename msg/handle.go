@@ -18,9 +18,10 @@ const (
 	FromTypeJson   = "application/json"
 )
 
+//handler data
 type handler struct {
 	conf  *ApiConfig
-	types string
+	types string         //FromType
 	from  url.Values
 	raw   map[string]interface{}
 }
@@ -28,7 +29,9 @@ type handler struct {
 func GetHandle() *handler {
 	return &handler{}
 }
-
+//hand http server
+//if want to any logic
+//add path and func
 func (handler *handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	contentType, content, err := initRequest(r)
 	handler.types = contentType
@@ -95,7 +98,7 @@ func (handler *handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 
 	responseSuccess(w)
 }
-
+//GetFromKey in json or url.Values(alias r.From)
 func (handler *handler) GetFromKey(key string) string {
 	if handler.types == FromTypeJson {
 		if _, ok := handler.raw[key]; ok {
@@ -111,7 +114,8 @@ func (handler *handler) GetFromKey(key string) string {
 	}
 	return ""
 }
-
+//GetFromKey in json or url.Values(alias r.From)
+//if empty return default
 func (handler *handler) GetFromKeyDefault(key string, defaults string) string {
 	var v string
 	if handler.types == FromTypeJson {
@@ -134,10 +138,11 @@ func (handler *handler) GetFromKeyDefault(key string, defaults string) string {
 	return v
 }
 
+//set config
 func (handler *handler) SetConfig(config *ApiConfig) {
 	handler.conf = config
 }
-
+//getContentType and parseFrom or RawData
 func initRequest(r *http.Request) (contentType string, content map[string]interface{}, err error) {
 	contentType = r.Header.Get("Content-Type")
 
@@ -162,7 +167,7 @@ func initRequest(r *http.Request) (contentType string, content map[string]interf
 
 	return contentType, nil, err
 }
-
+//Parse Json from *http.Request.Body
 func parseJsonRequest(r *http.Request) (map[string]interface{}, error) {
 	result, err := ioutil.ReadAll(r.Body)
 	if err == nil {
@@ -170,7 +175,7 @@ func parseJsonRequest(r *http.Request) (map[string]interface{}, error) {
 	}
 	return nil, err
 }
-
+//Parse Json from []byte
 func parseJsonByte(b []byte) (map[string]interface{}, error) {
 	var data map[string]interface{}
 	err := json.Unmarshal(b, &data)
@@ -179,7 +184,7 @@ func parseJsonByte(b []byte) (map[string]interface{}, error) {
 	}
 	return data, nil
 }
-
+//interface to []byte
 func interfaceToByteArray(value interface{}) (buff *bytes.Buffer, err error) {
 	bu := make([]byte, 0)
 	buff = bytes.NewBuffer(bu)

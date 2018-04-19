@@ -4,6 +4,7 @@ import (
 	"github.com/jingweno/conf"
 )
 
+//load from config.json
 type ApiConfig struct {
 	ApiKey     string
 	ServerPort string
@@ -12,6 +13,8 @@ type ApiConfig struct {
 	Uri        string
 }
 
+//load config from path
+//@return *ApiConfig
 func GetConfig(path string) *ApiConfig {
 
 	c, err := conf.NewLoader().Argv().Env().File(path).Load()

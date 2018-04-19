@@ -5,19 +5,20 @@ import (
 	"reflect"
 )
 
-
+// FcmMsg struct
 type FcmMsg struct {
-	messageId int
-	types   string
-	message *fcm.Message
-	conf    *ApiConfig
-	sendTime int64
+	messageId int        // relation sql save id  or other id
+	types   string       //  message type  message|notice|stand
+	message *fcm.Message  // message json obj
+	conf    *ApiConfig   //  serverConfig
+	sendTime int64      //  if sendTime > now()   add to cronTab
 }
 
 func GetNewFcm() *FcmMsg  {
 	return &FcmMsg{}
 }
 
+//set fcm receive topics
 func (fcmMsg *FcmMsg) SetTopic(topics interface{}) {
 	kind := reflect.ValueOf(topics).Type().Kind()
 	switch kind {
@@ -34,38 +35,39 @@ func (fcmMsg *FcmMsg) SetTopic(topics interface{}) {
 			break
 	}
 }
-
+//set fcm send Time
 func (fcmMsg *FcmMsg) SetSendTime(sendTime int64)  {
 	fcmMsg.sendTime = sendTime
 }
+//set fcm relation id
 func (fcmMsg *FcmMsg) SetMessageId(id int) {
 	fcmMsg.messageId = id
 }
-
+//set server config for get default value(icon maxttl click_action)
 func (fcmMsg *FcmMsg) SetConfig(config *ApiConfig) {
 	fcmMsg.conf = config
 }
-
+//set fcm receive tokens
 func (fcmMsg *FcmMsg) SetTo(token string) {
 	fcmMsg.message.To = token
 }
-
+//set fcm save google server ttl if user not online
 func (fcmMsg *FcmMsg) SetTtl(ttl *uint) {
 	fcmMsg.message.TimeToLive = ttl
 }
-
+//set fcm receive with topics condition
 func (fcmMsg *FcmMsg) SetCondition(condition string) {
 	fcmMsg.message.Condition = condition
 }
-
+//set fcm message body
 func (fcmMsg *FcmMsg) SetMessage(msg *fcm.Message) {
 	fcmMsg.message = msg
 }
-
+//if sendTime > now() Add to cron
 func (fcmMsg *FcmMsg) Task()  {
 	AddToTask(fcmMsg)
 }
-
+//try to send google
 func (fcmMsg *FcmMsg) Send() (*fcm.Response,error)  {
 
 	client, err := fcm.NewClient(fcmMsg.conf.GetKey())
@@ -77,7 +79,7 @@ func (fcmMsg *FcmMsg) Send() (*fcm.Response,error)  {
 
 	return response,err
 }
-
+//packaging set fcm receiver
 func (fcmMsg *FcmMsg) SetUsers(handler *handler) (err error)  {
 
 	if fcmMsg.types == MessageStand {
@@ -103,7 +105,7 @@ func (fcmMsg *FcmMsg) SetUsers(handler *handler) (err error)  {
 
 	return err
 }
-
+//topics merge to string
 func getMultiTopicsArray(arr []string) (str string) {
 	for _,v := range arr {
 		str += v + " && "
