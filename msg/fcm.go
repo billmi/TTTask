@@ -3,23 +3,22 @@ package msg
 import (
 	"github.com/appleboy/go-fcm"
 	"reflect"
-	"net/http"
-	"encoding/json"
-	"bytes"
 )
 
 
-type fcmMsg struct {
+type FcmMsg struct {
+	messageId int
 	types   string
 	message *fcm.Message
 	conf    *ApiConfig
+	sendTime int64
 }
 
-func GetNewFcm() *fcmMsg  {
-	return &fcmMsg{}
+func GetNewFcm() *FcmMsg  {
+	return &FcmMsg{}
 }
 
-func (fcmMsg *fcmMsg) SetTopic(topics interface{}) {
+func (fcmMsg *FcmMsg) SetTopic(topics interface{}) {
 	kind := reflect.ValueOf(topics).Type().Kind()
 	switch kind {
 		case reflect.String:
@@ -36,23 +35,38 @@ func (fcmMsg *fcmMsg) SetTopic(topics interface{}) {
 	}
 }
 
-func (fcmMsg *fcmMsg) SetConfig(config *ApiConfig) {
+func (fcmMsg *FcmMsg) SetSendTime(sendTime int64)  {
+	fcmMsg.sendTime = sendTime
+}
+func (fcmMsg *FcmMsg) SetMessageId(id int) {
+	fcmMsg.messageId = id
+}
+
+func (fcmMsg *FcmMsg) SetConfig(config *ApiConfig) {
 	fcmMsg.conf = config
 }
 
-func (fcmMsg *fcmMsg) SetTo(token string) {
+func (fcmMsg *FcmMsg) SetTo(token string) {
 	fcmMsg.message.To = token
 }
 
-func (fcmMsg *fcmMsg) SetCondition(condition string) {
+func (fcmMsg *FcmMsg) SetTtl(ttl *uint) {
+	fcmMsg.message.TimeToLive = ttl
+}
+
+func (fcmMsg *FcmMsg) SetCondition(condition string) {
 	fcmMsg.message.Condition = condition
 }
 
-func (fcmMsg *fcmMsg) SetMessage(msg *fcm.Message) {
+func (fcmMsg *FcmMsg) SetMessage(msg *fcm.Message) {
 	fcmMsg.message = msg
 }
 
-func (fcmMsg *fcmMsg) Send() (*fcm.Response,error)  {
+func (fcmMsg *FcmMsg) Task()  {
+	AddToTask(fcmMsg)
+}
+
+func (fcmMsg *FcmMsg) Send() (*fcm.Response,error)  {
 
 	client, err := fcm.NewClient(fcmMsg.conf.GetKey())
 	if err != nil {
@@ -64,27 +78,28 @@ func (fcmMsg *fcmMsg) Send() (*fcm.Response,error)  {
 	return response,err
 }
 
-func (fcmMsg *fcmMsg) SetUsers(r *http.Request) (err error)  {
+func (fcmMsg *FcmMsg) SetUsers(handler *handler) (err error)  {
 
-	if fcmMsg.types != MessageStand {
+	if fcmMsg.types == MessageStand {
 		return nil
 	}
 
-	condition := r.Form.Get("condition")
+	condition := handler.GetFromKey("condition")
 	if condition != "" {
 		fcmMsg.SetCondition(condition)
 	}
 
-	token := r.Form.Get("token")
+	token := handler.GetFromKey("token")
 	if token != "" {
 		fcmMsg.SetTo(token)
 	}
 
-	topic := r.Form.Get("topic")
-	if token != "" {
-		var interfaceTopic interface{}
-		fcmMsg.SetTopic(json.Unmarshal(bytes.NewBufferString(topic).Bytes(), interfaceTopic))
-	}
+	topic := handler.GetFromKey("topic")
+	fcmMsg.SetTopic(topic)
+	//if topic != "" {
+	//	var interfaceTopic interface{}
+	//	fcmMsg.SetTopic(json.Unmarshal(bytes.NewBufferString(topic).Bytes(), interfaceTopic))
+	//}
 
 	return err
 }

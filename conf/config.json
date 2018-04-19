@@ -1,5 +1,7 @@
 {
   "server_port":"8080",
   "max_ttl":2419200,
-  "api_key":"AAAA_1dLSps:APA91......ZHrCUioe-vx6wFvDXfnoh9h"
+  "api_key":"AAAA_1dLSps:APA91......ZHrCUioe-vx6wFvDXfnoh9h",
+  "icon":"http://",
+  "uri":"http://"
 }
