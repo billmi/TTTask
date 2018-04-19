@@ -12,6 +12,8 @@ func main()  {
 
 	path := ""
 	fmt.Println("Please input your config path(default /usr/etc/fcm.json): ")
+	fmt.Println("like this:")
+	fmt.Println(`{"server_port":"8080","max_ttl":2419200,"api_key":"AAAA_1dLSps:APA91......ZHrCUioe-vx6wFvDXfnoh9h"}`)
 	fmt.Scanln(&path)
 
 	if path == "" {

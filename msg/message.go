@@ -9,8 +9,11 @@ import (
 const (
 	MessageBody   = "message"
 	MessageNotice = "notice"
+	MessageStand  = "stand"
 )
 
+
+// Get Message from type default MessageBody
 func GetMessageType(r *http.Request) (types string)  {
 	types = r.FormValue("type")
 	if types == "" {
@@ -19,14 +22,22 @@ func GetMessageType(r *http.Request) (types string)  {
 
 	return types
 }
+
+// Get Message Content
 func GetMessage(r *http.Request, types string) *fcm.Message {
-	if types == MessageBody {
-		return getMessage(r)
+
+	if types == MessageNotice {
+		return getNotice(r)
 	}
 
-	return getNotice(r)
+	if types == MessageStand {
+		return getStand(r)
+	}
+
+	return getMessage(r)
 }
 
+// Get Message Content with type eq MessageBody
 func getMessage(r *http.Request) *fcm.Message {
 	data := []byte(r.FormValue("message"))
 	var message map[string]interface{}
@@ -39,6 +50,7 @@ func getMessage(r *http.Request) *fcm.Message {
 	}
 }
 
+// Get Message Content with type eq MessageNotice
 func getNotice(r *http.Request) *fcm.Message {
 	return &fcm.Message{
 		Notification: &fcm.Notification{
@@ -50,4 +62,13 @@ func getNotice(r *http.Request) *fcm.Message {
 	}
 }
 
+// Get Message Content with type eq MessageStand
+func getStand(r *http.Request) *fcm.Message  {
+	var msg  fcm.Message
+	//remove type first
+	r.Form.Del("type")
+	b,_ := interfaceToByteArray(r.Form)
+	json.Unmarshal(b.Bytes(), msg)
+	return &msg
+}
 
