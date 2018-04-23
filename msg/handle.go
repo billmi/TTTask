@@ -75,10 +75,22 @@ func (handler *handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	fcmMsg.SetTtl(&handler.conf.MaxTtl)
 	fcmMsg.SetUsers(handler)
 
+	msgId := ""
 	if fcmMsg.sendTime > 0 {
 		fcmMsg.Task()
+		responseSuccess(w,"")
 	} else{
 		//發送消息
+		//response : https://firebase.google.com/docs/cloud-messaging/http-server-ref?hl=zh-cn#error-codes
+		//multicast_id	必选，数字	用于识别多播消息的唯一 ID（数字）。
+		//success	必选，数字	处理时未出错的消息数。
+		//failure	必选，数字	无法处理的消息数。
+		//canonical_ids	必选，数字	包含规范注册令牌的结果数。
+		//规范注册 ID 是客户端应用最后一次请求注册时的注册令牌。这是服务器在向设备发送消息时应当使用的 ID。
+		//results
+		//      message_id：字符串，用于指定每条成功处理的消息的唯一 ID。
+		//		registration_id：可选字符串，用于指定处理和接收消息的客户端应用的规范注册令牌。发送者应使用此值作为未来请求的注册令牌。否则，消息可能被拒绝。
+		//		error：字符串，用于指定处理收件人的消息时发生的错误。表 9 中列出了可能的值。
 		response, err := fcmMsg.Send()
 		log.Println(response,err)
 		if err != nil {
@@ -97,9 +109,18 @@ func (handler *handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		}
 
 		log.Println(response)
+
+		if fcmMsg.sendType == TypeToken {
+
+		}
+
+		if fcmMsg.sendType == TypeTopic {
+
+		}
+		responseSuccess(w,msgId)
 	}
 
-	responseSuccess(w)
+
 }
 //GetFromKey in json or url.Values(alias r.From)
 func (handler *handler) GetFromKey(key string) string {
@@ -214,10 +235,10 @@ func responseErrorMessage(w http.ResponseWriter, code int, message interface{}) 
 	w.Write(b)
 }
 
-func responseSuccess(w http.ResponseWriter)  {
+func responseSuccess(w http.ResponseWriter, msgId string)  {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
-	w.Write(GetError(200))
+	w.Write(GetSuccess(msgId))
 }
 //func getFromValue(r *http.Request, key string, defaultValue interface{}) interface{} {
 //	value := r.Form.Get(key)

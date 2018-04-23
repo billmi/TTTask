@@ -38,12 +38,25 @@ func GetError(key int) []byte {
 	return nil
 }
 
-func GetErrorObj(key int) fcmError {
-	initErrors()
+func GetSuccess(msgId string) []byte {
 
-	if _,ok := errors[key]; ok {
-		return errors[key]
+	if msgId == "" {
+		return GetSuccessAsync()
 	}
 
-	return fcmError{500,""}
+	return GetSuccessSync(msgId)
+}
+func GetSuccessSync(msgId string) []byte {
+	f := errors[200]
+	type response struct{
+		MsgId string `json:"msg_id"`
+	}
+	f.Response = response{MsgId:msgId}
+	b,_ := json.Marshal(f)
+	return b
+}
+
+func GetSuccessAsync() []byte {
+	b,_ := json.Marshal(errors[200])
+	return b
 }

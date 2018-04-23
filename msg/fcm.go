@@ -3,6 +3,7 @@ package msg
 import (
 	"github.com/appleboy/go-fcm"
 	"reflect"
+	"errors"
 )
 
 // FcmMsg struct
@@ -12,6 +13,7 @@ type FcmMsg struct {
 	message *fcm.Message  // message json obj
 	conf    *ApiConfig   //  serverConfig
 	sendTime int64      //  if sendTime > now()   add to cronTab
+	sendType int
 }
 
 func GetNewFcm() *FcmMsg  {
@@ -88,22 +90,26 @@ func (fcmMsg *FcmMsg) SetUsers(handler *handler) (err error)  {
 
 	condition := handler.GetFromKey("condition")
 	if condition != "" {
+		fcmMsg.sendType = TypeTopic
 		fcmMsg.SetCondition(condition)
+		return nil
 	}
 
 	token := handler.GetFromKey("token")
 	if token != "" {
+		fcmMsg.sendType = TypeToken
 		fcmMsg.SetTo(token)
+		return nil
 	}
 
 	topic := handler.GetFromKey("topic")
-	fcmMsg.SetTopic(topic)
-	//if topic != "" {
-	//	var interfaceTopic interface{}
-	//	fcmMsg.SetTopic(json.Unmarshal(bytes.NewBufferString(topic).Bytes(), interfaceTopic))
-	//}
+	if topic != "" {
+		fcmMsg.sendType = TypeTopic
+		fcmMsg.SetTopic(topic)
+		return nil
+	}
 
-	return err
+	return errors.New("not receive send user")
 }
 //topics merge to string
 func getMultiTopicsArray(arr []string) (str string) {
