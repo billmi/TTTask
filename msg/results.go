@@ -12,26 +12,26 @@ type fcmError struct {
 	Response interface{} `json:"response,omitempty"`
 }
 
-var errors map[int]fcmError
+var errorsMap map[int]fcmError
 var onceResponse sync.Once
 
 //init once
 func initErrors()  map[int]fcmError {
 	onceResponse.Do(func() {
-		errors = make(map[int]fcmError)
-		errors[400] = fcmError{400, "錯誤的消息體"}
-		errors[401] = fcmError{401, "授權未通過"}
-		errors[200] = fcmError{0,"success"}
+		errorsMap = make(map[int]fcmError)
+		errorsMap[400] = fcmError{400, "錯誤的消息體"}
+		errorsMap[401] = fcmError{401, "授權未通過"}
+		errorsMap[200] = fcmError{0,"success"}
 	})
-	return errors
+	return errorsMap
 }
 
 //get error []byte to write
 func GetError(key int) []byte {
 	initErrors()
 
-	if _,ok := errors[key]; ok {
-		b,_ := json.Marshal(errors[key])
+	if _,ok := errorsMap[key]; ok {
+		b,_ := json.Marshal(errorsMap[key])
 		return b
 	}
 
@@ -47,7 +47,7 @@ func GetSuccess(msgId string) []byte {
 	return GetSuccessSync(msgId)
 }
 func GetSuccessSync(msgId string) []byte {
-	f := errors[200]
+	f := errorsMap[200]
 	type response struct{
 		MsgId string `json:"msg_id"`
 	}
@@ -57,6 +57,6 @@ func GetSuccessSync(msgId string) []byte {
 }
 
 func GetSuccessAsync() []byte {
-	b,_ := json.Marshal(errors[200])
+	b,_ := json.Marshal(errorsMap[200])
 	return b
 }

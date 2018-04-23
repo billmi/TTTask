@@ -11,6 +11,11 @@ type DefaultNotification struct{
 	Uri string
 }
 //load from config.json
+//ApiKey https://firebase.google.com/docs/server/setup#prerequisites
+//ServerPort http listen server
+//MaxTtl https://firebase.google.com/docs/cloud-messaging/concept-options#ttl
+//Notification
+//normal notification content if no post value
 type ApiConfig struct {
 	ApiKey     string
 	ServerPort string

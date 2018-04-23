@@ -98,11 +98,6 @@ func (handler *handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		if response.Failure > 0 {
-			responseError(w, 400)
-			return
-		}
-
 		if response.Error != nil {
 			responseErrorMessage(w, 500, err.Error())
 			return
@@ -111,12 +106,16 @@ func (handler *handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		log.Println(response)
 
 		if fcmMsg.sendType == TypeToken {
-
+			if response.Failure > 0 {
+				responseError(w, 400)
+				return
+			}
 		}
 
-		if fcmMsg.sendType == TypeTopic {
-
-		}
+		//todo: topics fail response
+		//if fcmMsg.sendType == TypeTopic {
+		//
+		//}
 		responseSuccess(w,msgId)
 	}
 

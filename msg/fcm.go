@@ -13,7 +13,7 @@ type FcmMsg struct {
 	message *fcm.Message  // message json obj
 	conf    *ApiConfig   //  serverConfig
 	sendTime int64      //  if sendTime > now()   add to cronTab
-	sendType int
+	sendType int		// topics or token
 }
 
 func GetNewFcm() *FcmMsg  {

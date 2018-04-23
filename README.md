@@ -23,11 +23,15 @@ input config file path to loading
 
 ```$xslt
 {
-  "server_port":"8080",  //http port 
-  "max_ttl":2419200,     //message max time to live
-  "api_key":"AAAA_1dLSps:APA91......ZHrCUioe-vx6wFvDXfnoh9h",  //fcm key
-  "icon":"http://",    //icon uri
-  "uri":"http://"      //click_action uri
+  "server_port":"8080",
+  "max_ttl":2419200,
+  "api_key":"AAAA_1dLSps:APA91......ZHrCUioe-vx6wFvDXfnoh9h",
+  "notification":{
+    "title":"",
+    "body":"",
+    "icon":"http://",
+    "uri":"http://"
+  }
 }
 ```
 
