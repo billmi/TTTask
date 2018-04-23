@@ -12,6 +12,8 @@ const (
 	MessageStand  = "stand"
 )
 
+const TypeTopic  = 1
+const TypeToken  = 2
 
 // Get Message from type default MessageBody
 func GetMessageType(handler *handler) (types string)  {
@@ -55,10 +57,10 @@ func getMessage(handler *handler) *fcm.Message {
 func getNotice(handler *handler) *fcm.Message {
 	return &fcm.Message{
 		Notification: &fcm.Notification{
-			Title:       handler.GetFromKeyDefault("title","通知"),
-			Body:        handler.GetFromKeyDefault("body","您有新的消息，請注意查收"),
-			Icon:        handler.GetFromKeyDefault("icon",handler.conf.Icon),
-			ClickAction: handler.GetFromKeyDefault("click_action",handler.conf.Uri),
+			Title:       handler.GetFromKeyDefault("title",handler.conf.Notification.Title),
+			Body:        handler.GetFromKeyDefault("body",handler.conf.Notification.Body),
+			Icon:        handler.GetFromKeyDefault("icon",handler.conf.Notification.Icon),
+			ClickAction: handler.GetFromKeyDefault("click_action",handler.conf.Notification.Uri),
 		},
 	}
 }

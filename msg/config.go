@@ -4,13 +4,18 @@ import (
 	"github.com/jingweno/conf"
 )
 
+type DefaultNotification struct{
+	Title string
+	Body string
+	Icon string
+	Uri string
+}
 //load from config.json
 type ApiConfig struct {
 	ApiKey     string
 	ServerPort string
 	MaxTtl     uint
-	Icon	   string
-	Uri        string
+	Notification *DefaultNotification
 }
 
 //load config from path
@@ -23,12 +28,34 @@ func GetConfig(path string) *ApiConfig {
 		panic("load config err")
 	}
 
+	maps := c.Get("notification").(map[string]interface{})
+	notification:=&DefaultNotification{}
+	for key,value := range maps {
+		if key == "uri" {
+			notification.Uri = value.(string)
+			continue
+		}
+
+		if key == "body" {
+			notification.Body = value.(string)
+			continue
+		}
+
+		if key == "icon" {
+			notification.Icon = value.(string)
+			continue
+		}
+
+		if key == "title" {
+			notification.Title = value.(string)
+			continue
+		}
+	}
 	return &ApiConfig{
 		ApiKey:     c.Get("api_key").(string),
 		ServerPort: c.Get("server_port").(string),
 		MaxTtl:     uint(c.Get("max_ttl").(float64)),
-		Icon:       c.Get("icon").(string),
-		Uri:        c.Get("uri").(string),
+		Notification: notification,
 	}
 }
 

@@ -9,6 +9,7 @@ import (
 	"strconv"
 	"net/url"
 	"reflect"
+	"log"
 )
 
 const (
@@ -79,9 +80,9 @@ func (handler *handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	} else{
 		//發送消息
 		response, err := fcmMsg.Send()
-
+		log.Println(response,err)
 		if err != nil {
-			responseError(w, 400)
+			responseErrorMessage(w, 500, err.Error())
 			return
 		}
 
@@ -94,6 +95,8 @@ func (handler *handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			responseErrorMessage(w, 500, err.Error())
 			return
 		}
+
+		log.Println(response)
 	}
 
 	responseSuccess(w)
@@ -101,39 +104,43 @@ func (handler *handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 //GetFromKey in json or url.Values(alias r.From)
 func (handler *handler) GetFromKey(key string) string {
 	if handler.types == FromTypeJson {
-		if _, ok := handler.raw[key]; ok {
-			t := reflect.ValueOf(handler.raw[key]).Kind()
-			if t != reflect.String {
-				s, _ := json.Marshal(handler.raw[key])
-				return string(s[:])
-			}
-			return handler.raw[key].(string)
-		}
+		return handler.getRawData(key)
 	} else {
-		return handler.from.Get(key)
+		v := handler.from.Get(key)
+		if v == "" {
+			v = handler.getRawData(key)
+		}
+		return v
 	}
-	return ""
 }
 //GetFromKey in json or url.Values(alias r.From)
 //if empty return default
 func (handler *handler) GetFromKeyDefault(key string, defaults string) string {
 	var v string
 	if handler.types == FromTypeJson {
-		if _, ok := handler.raw[key]; ok {
-			t := reflect.ValueOf(handler.raw[key]).Kind()
-			if t != reflect.String {
-				s, _ := json.Marshal(handler.raw[key])
-				v = string(s[:])
-			}else {
-				v = handler.raw[key].(string)
-			}
-		}
+		v = handler.getRawData(key)
 	} else {
 		v = handler.from.Get(key)
-
+		if v == "" {
+			v = handler.getRawData(key)
+		}
 	}
 	if v == "" {
 		return defaults
+	}
+	return v
+}
+
+func (handler *handler) getRawData(key string) string  {
+	v := ""
+	if _, ok := handler.raw[key]; ok {
+		t := reflect.ValueOf(handler.raw[key]).Kind()
+		if t != reflect.String {
+			s, _ := json.Marshal(handler.raw[key])
+			v = string(s[:])
+		}else {
+			v = handler.raw[key].(string)
+		}
 	}
 	return v
 }
