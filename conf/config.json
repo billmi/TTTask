@@ -2,6 +2,8 @@
   "server_port":"8080",
   "max_ttl":2419200,
   "api_key":"AAAA_1dLSps:APA91......ZHrCUioe-vx6wFvDXfnoh9h",
+  "notify_callback":"http://localhost:8000/fcm/notify",
+  "log_file":"/tmp/",
   "notification":{
     "title":"",
     "body":"",

@@ -4,12 +4,13 @@ import (
 	"github.com/jingweno/conf"
 )
 
-type DefaultNotification struct{
+type DefaultNotification struct {
 	Title string
-	Body string
-	Icon string
-	Uri string
+	Body  string
+	Icon  string
+	Uri   string
 }
+
 //load from config.json
 //ApiKey https://firebase.google.com/docs/server/setup#prerequisites
 //ServerPort http listen server
@@ -17,9 +18,11 @@ type DefaultNotification struct{
 //Notification
 //normal notification content if no post value
 type ApiConfig struct {
-	ApiKey     string
-	ServerPort string
-	MaxTtl     uint
+	ApiKey       string
+	ServerPort   string
+	MaxTtl       uint
+	CallBack     string
+	LogFile      string
 	Notification *DefaultNotification
 }
 
@@ -34,8 +37,8 @@ func GetConfig(path string) *ApiConfig {
 	}
 
 	maps := c.Get("notification").(map[string]interface{})
-	notification:=&DefaultNotification{}
-	for key,value := range maps {
+	notification := &DefaultNotification{}
+	for key, value := range maps {
 		if key == "uri" {
 			notification.Uri = value.(string)
 			continue
@@ -57,10 +60,12 @@ func GetConfig(path string) *ApiConfig {
 		}
 	}
 	return &ApiConfig{
-		ApiKey:     c.Get("api_key").(string),
-		ServerPort: c.Get("server_port").(string),
-		MaxTtl:     uint(c.Get("max_ttl").(float64)),
+		ApiKey:       c.Get("api_key").(string),
+		ServerPort:   c.Get("server_port").(string),
+		MaxTtl:       uint(c.Get("max_ttl").(float64)),
 		Notification: notification,
+		CallBack:     c.Get("call_back").(string),
+		LogFile:      c.Get("log_file").(string),
 	}
 }
 

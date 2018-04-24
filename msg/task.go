@@ -34,12 +34,18 @@ func AddToTask(fcmMsg *FcmMsg)  {
 	spec := strconv.Itoa(sendTime.Second())+" "+strconv.Itoa(sendTime.Minute())+" "+strconv.Itoa(sendTime.Hour())+" "+strconv.Itoa(sendTime.Day())+" "+strconv.Itoa(int(sendTime.Month()))
 	log.Println("Add sendTask with time "+ spec)
 	GetTask().AddFunc(spec, func() {
-		response,_ := fcmMsg.Send()
+		response,err := fcmMsg.Send()
 		log.Println("Send!")
 		taskEntity = append(taskEntity, &task{fcmMsg,response})
 		log.Println(taskEntity)
-		//todo: add callback
 		// and add task list restful
+		status := 200
+		if err != nil {
+			status = 500
+		}
+		call := GetCallBack(string(fcmMsg.messageId),  status)
+		call.SetConfig(fcmMsg.conf)
+		call.Do()
 	})
 	GetTask().Start()
 }

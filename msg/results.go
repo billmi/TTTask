@@ -7,28 +7,29 @@ import (
 
 //response body content
 //like {"code":200,"response":"success"}
-type fcmError struct {
+type fcmResponse struct {
 	Code int `json:"code,omitempty"`
 	Response interface{} `json:"response,omitempty"`
 }
 
-var errorsMap map[int]fcmError
+var errorsMap map[int]fcmResponse
 var onceResponse sync.Once
 
 //init once
-func initErrors()  map[int]fcmError {
+func initResponse()  map[int]fcmResponse {
 	onceResponse.Do(func() {
-		errorsMap = make(map[int]fcmError)
-		errorsMap[400] = fcmError{400, "錯誤的消息體"}
-		errorsMap[401] = fcmError{401, "授權未通過"}
-		errorsMap[200] = fcmError{0,"success"}
+		errorsMap = make(map[int]fcmResponse)
+		errorsMap[400] = fcmResponse{400, "錯誤的消息體"}
+		errorsMap[401] = fcmResponse{401, "授權未通過"}
+		errorsMap[200] = fcmResponse{0,"success"}
+		errorsMap[406] = fcmResponse{406,"Method Not Allowed"}
 	})
 	return errorsMap
 }
 
 //get error []byte to write
 func GetError(key int) []byte {
-	initErrors()
+	initResponse()
 
 	if _,ok := errorsMap[key]; ok {
 		b,_ := json.Marshal(errorsMap[key])

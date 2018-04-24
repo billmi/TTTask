@@ -36,16 +36,19 @@ func GetHandle() *handler {
 func (handler *handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	contentType, content, err := initRequest(r)
 	handler.types = contentType
-	if contentType == FromTypeJson {
-		handler.raw = content
-	} else {
-		handler.from = r.Form
+
+	//only support json
+	if contentType != FromTypeJson {
+		responseError(w, 406)
+		return
 	}
 
 	if err != nil {
 		responseError(w, 400)
 		return
 	}
+
+	handler.raw = content
 
 	fcmMsg := GetNewFcm()
 
@@ -116,37 +119,42 @@ func (handler *handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		//if fcmMsg.sendType == TypeTopic {
 		//
 		//}
-		responseSuccess(w,msgId)
+		//todo: add call back
+		responseSuccess(w, msgId)
 	}
 
 
 }
 //GetFromKey in json or url.Values(alias r.From)
 func (handler *handler) GetFromKey(key string) string {
-	if handler.types == FromTypeJson {
-		return handler.getRawData(key)
-	} else {
-		v := handler.from.Get(key)
-		if v == "" {
-			v = handler.getRawData(key)
-		}
-		return v
-	}
+
+	return handler.getRawData(key)
+	//if handler.types == FromTypeJson {
+	//
+	//} else {
+	//	v := handler.from.Get(key)
+	//	if v == "" {
+	//		v = handler.getRawData(key)
+	//	}
+	//	return v
+	//}
 }
 //GetFromKey in json or url.Values(alias r.From)
 //if empty return default
 func (handler *handler) GetFromKeyDefault(key string, defaults string) string {
 	var v string
-	if handler.types == FromTypeJson {
-		v = handler.getRawData(key)
-	} else {
-		v = handler.from.Get(key)
-		if v == "" {
-			v = handler.getRawData(key)
-		}
-	}
+
+	v = handler.getRawData(key)
+	//if handler.types == FromTypeJson {
+	//
+	//} else {
+	//	v = handler.from.Get(key)
+	//	if v == "" {
+	//		v = handler.getRawData(key)
+	//	}
+	//}
 	if v == "" {
-		return defaults
+		v = defaults
 	}
 	return v
 }
@@ -173,26 +181,28 @@ func (handler *handler) SetConfig(config *ApiConfig) {
 func initRequest(r *http.Request) (contentType string, content map[string]interface{}, err error) {
 	contentType = r.Header.Get("Content-Type")
 
-	if contentType == FromTypeEmpty || contentType == FromTypeNormal {
-		err = r.ParseForm()
-	} else if contentType == FromTypeMulti {
-		err = r.ParseMultipartForm(2 << 20)
-	} else if contentType == FromTypeJson {
-		content, err := parseJsonRequest(r)
-		return contentType, content, err
-	} else {
-		err = r.ParseForm()
-	}
+	content, err = parseJsonRequest(r)
+	return contentType, content, err
 
-	if len(r.Form) == 1 {
-		contentType = FromTypeJson
-		for key, _ := range r.Form {
-			content, err := parseJsonByte(bytes.NewBufferString(key).Bytes())
-			return contentType, content, err
-		}
-	}
-
-	return contentType, nil, err
+	//if contentType == FromTypeEmpty || contentType == FromTypeNormal {
+	//	err = r.ParseForm()
+	//} else if contentType == FromTypeMulti {
+	//	err = r.ParseMultipartForm(2 << 20)
+	//} else if contentType == FromTypeJson {
+	//
+	//} else {
+	//	err = r.ParseForm()
+	//}
+	//
+	//if len(r.Form) == 1 {
+	//	contentType = FromTypeJson
+	//	for key, _ := range r.Form {
+	//		content, err := parseJsonByte(bytes.NewBufferString(key).Bytes())
+	//		return contentType, content, err
+	//	}
+	//}
+	//
+	//return contentType, nil, err
 }
 //Parse Json from *http.Request.Body
 func parseJsonRequest(r *http.Request) (map[string]interface{}, error) {
@@ -228,7 +238,7 @@ func responseError(w http.ResponseWriter, code int) {
 }
 
 func responseErrorMessage(w http.ResponseWriter, code int, message interface{}) {
-	b, _ := json.Marshal(fcmError{code, message})
+	b, _ := json.Marshal(fcmResponse{code, message})
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(code)
 	w.Write(b)
