@@ -26,6 +26,8 @@ input config file path to loading
   "server_port":"8080",
   "max_ttl":2419200,
   "api_key":"AAAA_1dLSps:APA91......ZHrCUioe-vx6wFvDXfnoh9h",
+  "notify_callback":"http://localhost:8000/fcm/notify",
+  "log_file":"/tmp/",
   "notification":{
     "title":"",
     "body":"",
@@ -77,4 +79,13 @@ port It's config file setting
     "send_time":"1524136833" // if send_time > now , It add to crontab
 }
 ```
+
+
+#### callback
+
+if you set config notify_callback
+
+It's want be POST JSON to notify_callback_url
+
+see [callback](https://github.com/lwl1989/TTTask/blob/master/msg/callback.go)
 

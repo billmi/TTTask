@@ -64,7 +64,7 @@ func GetConfig(path string) *ApiConfig {
 		ServerPort:   c.Get("server_port").(string),
 		MaxTtl:       uint(c.Get("max_ttl").(float64)),
 		Notification: notification,
-		CallBack:     c.Get("call_back").(string),
+		CallBack:     c.Get("notify_callback").(string),
 		LogFile:      c.Get("log_file").(string),
 	}
 }
