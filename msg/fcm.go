@@ -4,19 +4,23 @@ import (
 	"github.com/appleboy/go-fcm"
 	"reflect"
 	"errors"
+	"encoding/json"
+	"bytes"
+	"strings"
+	"fmt"
 )
 
 // FcmMsg struct
 type FcmMsg struct {
-	messageId int        // relation sql save id  or other id
-	types   string       //  message type  message|notice|stand
-	message *fcm.Message  // message json obj
-	conf    *ApiConfig   //  serverConfig
-	sendTime int64      //  if sendTime > now()   add to cronTab
-	sendType int		// topics or token
+	messageId int          // relation sql save id  or other id
+	types     string       //  message type  message|notice|stand
+	message   *fcm.Message // message json obj
+	conf      *ApiConfig   //  serverConfig
+	sendTime  int64        //  if sendTime > now()   add to cronTab
+	sendType  int          // topics or token
 }
 
-func GetNewFcm() *FcmMsg  {
+func GetNewFcm() *FcmMsg {
 	return &FcmMsg{}
 }
 
@@ -24,65 +28,112 @@ func GetNewFcm() *FcmMsg  {
 func (fcmMsg *FcmMsg) SetTopic(topics interface{}) {
 	kind := reflect.ValueOf(topics).Type().Kind()
 	switch kind {
-		case reflect.String:
-			fcmMsg.message.To = topics.(string)
-			break
-		case reflect.Array:
-			fcmMsg.message.Condition = getMultiTopicsArray(topics.([]string))
-			break
+	case reflect.String:
+		fcmMsg.message.To = topics.(string)
+		break
+	case reflect.Array:
+		fcmMsg.message.Condition = getMultiTopicsArray(topics.([]string))
+		break
 		//case reflect.Map:
 		//	fcmMsg.message.Condition = getMultiTopicsMap(topics.(map[string]interface{}))
-		default:
-			fcmMsg.message.To = topics.(string)
-			break
+	default:
+		fcmMsg.message.To = topics.(string)
+		break
 	}
 }
+
 //set fcm send Time
-func (fcmMsg *FcmMsg) SetSendTime(sendTime int64)  {
+func (fcmMsg *FcmMsg) SetSendTime(sendTime int64) {
 	fcmMsg.sendTime = sendTime
 }
+
 //set fcm relation id
 func (fcmMsg *FcmMsg) SetMessageId(id int) {
 	fcmMsg.messageId = id
 }
+
 //set server config for get default value(icon maxttl click_action)
 func (fcmMsg *FcmMsg) SetConfig(config *ApiConfig) {
 	fcmMsg.conf = config
 }
-//set fcm receive tokens
+
+//set fcm receive multi tokens
+func (fcmMsg *FcmMsg) SetRegistrationIds(tokens string) {
+	arr := make([]string, 1)
+	err := json.Unmarshal(bytes.NewBufferString(tokens).Bytes(), arr)
+	if err != nil {
+		arr = strings.Split(tokens, ",")
+	}
+
+	fmt.Println(arr)
+	fcmMsg.message.RegistrationIDs = arr
+}
+
+//set fcm receive token
 func (fcmMsg *FcmMsg) SetTo(token string) {
 	fcmMsg.message.To = token
 }
+
 //set fcm save google server ttl if user not online
 func (fcmMsg *FcmMsg) SetTtl(ttl *uint) {
 	fcmMsg.message.TimeToLive = ttl
 }
+
 //set fcm receive with topics condition
 func (fcmMsg *FcmMsg) SetCondition(condition string) {
 	fcmMsg.message.Condition = condition
 }
+
 //set fcm message body
 func (fcmMsg *FcmMsg) SetMessage(msg *fcm.Message) {
 	fcmMsg.message = msg
 }
+
 //if sendTime > now() Add to cron
-func (fcmMsg *FcmMsg) Task()  {
+func (fcmMsg *FcmMsg) Task() {
 	AddToTask(fcmMsg)
 }
+func (fcmMsg *FcmMsg) Run() {
+	response, err := fcmMsg.Send()
+	taskEntity = append(taskEntity, &task{fcmMsg, response})
+
+	//todo: need delete send task
+	//entities := GetTask().Entries()
+	//fmt.Println(entities)
+	//for k,entity := range entities {
+	//	f := entity.Job.(*FcmMsg)
+	//	if f.sendTime < time.Now().Unix() {
+	//		entities = append(entities[0:k], entities[k+1:]...)
+	//		break
+	//	}
+	//}
+	//
+	//fmt.Println(entities)
+
+	// and add task list restful
+	status := 200
+	if err != nil {
+		status = 500
+	}
+	call := GetCallBack(string(fcmMsg.messageId), status)
+	call.SetConfig(fcmMsg.conf)
+	call.Do()
+}
+
 //try to send google
-func (fcmMsg *FcmMsg) Send() (*fcm.Response,error)  {
+func (fcmMsg *FcmMsg) Send() (*fcm.Response, error) {
 
 	client, err := fcm.NewClient(fcmMsg.conf.GetKey())
 	if err != nil {
-		return nil,err
+		return nil, err
 	}
-
 	response, err := client.Send(fcmMsg.message)
 
-	return response,err
+	return response, err
 }
+
 //packaging set fcm receiver
-func (fcmMsg *FcmMsg) SetUsers(handler *handler) (err error)  {
+func (fcmMsg *FcmMsg) SetUsers(handler *handler) (err error) {
 
 	if fcmMsg.types == MessageStand {
 		return nil
@@ -92,6 +143,13 @@ func (fcmMsg *FcmMsg) SetUsers(handler *handler) (err error)  {
 	if condition != "" {
 		fcmMsg.sendType = TypeTopic
 		fcmMsg.SetCondition(condition)
+		return nil
+	}
+
+	tokens := handler.GetFromKey("tokens")
+	if tokens != "" {
+		fcmMsg.sendType = TypeToken
+		fcmMsg.SetRegistrationIds(tokens)
 		return nil
 	}
 
@@ -111,9 +169,10 @@ func (fcmMsg *FcmMsg) SetUsers(handler *handler) (err error)  {
 
 	return errors.New("not receive send user")
 }
+
 //topics merge to string
 func getMultiTopicsArray(arr []string) (str string) {
-	for _,v := range arr {
+	for _, v := range arr {
 		str += v + " && "
 	}
 	return str

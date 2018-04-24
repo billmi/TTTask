@@ -22,7 +22,7 @@ const (
 //handler data
 type handler struct {
 	conf  *ApiConfig
-	types string         //FromType
+	types string //FromType
 	from  url.Values
 	raw   map[string]interface{}
 }
@@ -30,6 +30,7 @@ type handler struct {
 func GetHandle() *handler {
 	return &handler{}
 }
+
 //hand http server
 //if want to any logic
 //add path and func
@@ -81,8 +82,8 @@ func (handler *handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 	msgId := ""
 	if fcmMsg.sendTime > 0 {
 		fcmMsg.Task()
-		responseSuccess(w,"")
-	} else{
+		responseSuccess(w, msgId)
+	} else {
 		//發送消息
 		//response : https://firebase.google.com/docs/cloud-messaging/http-server-ref?hl=zh-cn#error-codes
 		//multicast_id	必选，数字	用于识别多播消息的唯一 ID（数字）。
@@ -95,7 +96,7 @@ func (handler *handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		//		registration_id：可选字符串，用于指定处理和接收消息的客户端应用的规范注册令牌。发送者应使用此值作为未来请求的注册令牌。否则，消息可能被拒绝。
 		//		error：字符串，用于指定处理收件人的消息时发生的错误。表 9 中列出了可能的值。
 		response, err := fcmMsg.Send()
-		log.Println(response,err)
+		log.Println(response, err)
 		if err != nil {
 			responseErrorMessage(w, 500, err.Error())
 			return
@@ -106,13 +107,11 @@ func (handler *handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 			return
 		}
 
-		log.Println(response)
+		msgId = strconv.FormatInt(response.MessageID, 10)
 
-		if fcmMsg.sendType == TypeToken {
-			if response.Failure > 0 {
-				responseError(w, 400)
-				return
-			}
+		if response.Failure > 0 {
+			responseErrorMessage(w, 200, "fail send "+strconv.Itoa(response.Failure)+" message")
+			return
 		}
 
 		//todo: topics fail response
@@ -123,8 +122,8 @@ func (handler *handler) ServeHTTP(w http.ResponseWriter, r *http.Request) {
 		responseSuccess(w, msgId)
 	}
 
-
 }
+
 //GetFromKey in json or url.Values(alias r.From)
 func (handler *handler) GetFromKey(key string) string {
 
@@ -139,6 +138,7 @@ func (handler *handler) GetFromKey(key string) string {
 	//	return v
 	//}
 }
+
 //GetFromKey in json or url.Values(alias r.From)
 //if empty return default
 func (handler *handler) GetFromKeyDefault(key string, defaults string) string {
@@ -159,14 +159,14 @@ func (handler *handler) GetFromKeyDefault(key string, defaults string) string {
 	return v
 }
 
-func (handler *handler) getRawData(key string) string  {
+func (handler *handler) getRawData(key string) string {
 	v := ""
 	if _, ok := handler.raw[key]; ok {
 		t := reflect.ValueOf(handler.raw[key]).Kind()
 		if t != reflect.String {
 			s, _ := json.Marshal(handler.raw[key])
 			v = string(s[:])
-		}else {
+		} else {
 			v = handler.raw[key].(string)
 		}
 	}
@@ -177,6 +177,7 @@ func (handler *handler) getRawData(key string) string  {
 func (handler *handler) SetConfig(config *ApiConfig) {
 	handler.conf = config
 }
+
 //getContentType and parseFrom or RawData
 func initRequest(r *http.Request) (contentType string, content map[string]interface{}, err error) {
 	contentType = r.Header.Get("Content-Type")
@@ -204,6 +205,7 @@ func initRequest(r *http.Request) (contentType string, content map[string]interf
 	//
 	//return contentType, nil, err
 }
+
 //Parse Json from *http.Request.Body
 func parseJsonRequest(r *http.Request) (map[string]interface{}, error) {
 	result, err := ioutil.ReadAll(r.Body)
@@ -212,6 +214,7 @@ func parseJsonRequest(r *http.Request) (map[string]interface{}, error) {
 	}
 	return nil, err
 }
+
 //Parse Json from []byte
 func parseJsonByte(b []byte) (map[string]interface{}, error) {
 	var data map[string]interface{}
@@ -221,6 +224,7 @@ func parseJsonByte(b []byte) (map[string]interface{}, error) {
 	}
 	return data, nil
 }
+
 //interface to []byte
 func interfaceToByteArray(value interface{}) (buff *bytes.Buffer, err error) {
 	bu := make([]byte, 0)
@@ -244,11 +248,12 @@ func responseErrorMessage(w http.ResponseWriter, code int, message interface{}) 
 	w.Write(b)
 }
 
-func responseSuccess(w http.ResponseWriter, msgId string)  {
+func responseSuccess(w http.ResponseWriter, msgId string) {
 	w.Header().Set("Content-Type", "application/json")
 	w.WriteHeader(200)
 	w.Write(GetSuccess(msgId))
 }
+
 //func getFromValue(r *http.Request, key string, defaultValue interface{}) interface{} {
 //	value := r.Form.Get(key)
 //	if value == "" {

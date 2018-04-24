@@ -12,11 +12,11 @@ const (
 	MessageStand  = "stand"
 )
 
-const TypeTopic  = 1
-const TypeToken  = 2
+const TypeTopic = 1
+const TypeToken = 2
 
 // Get Message from type default MessageBody
-func GetMessageType(handler *handler) (types string)  {
+func GetMessageType(handler *handler) (types string) {
 	types = handler.GetFromKey("type")
 	if types == "" {
 		types = MessageBody
@@ -46,7 +46,7 @@ func getMessage(handler *handler) *fcm.Message {
 	var message map[string]interface{}
 	err := json.Unmarshal(data, &message)
 	if err != nil {
-		panic("message body error" + string(data[:]) + "! error:"+ err.Error())
+		panic("message body error" + string(data[:]) + "! error:" + err.Error())
 	}
 	return &fcm.Message{
 		Data: message,
@@ -57,25 +57,24 @@ func getMessage(handler *handler) *fcm.Message {
 func getNotice(handler *handler) *fcm.Message {
 	return &fcm.Message{
 		Notification: &fcm.Notification{
-			Title:       handler.GetFromKeyDefault("title",handler.conf.Notification.Title),
-			Body:        handler.GetFromKeyDefault("body",handler.conf.Notification.Body),
-			Icon:        handler.GetFromKeyDefault("icon",handler.conf.Notification.Icon),
-			ClickAction: handler.GetFromKeyDefault("click_action",handler.conf.Notification.Uri),
+			Title:       handler.GetFromKeyDefault("title", handler.conf.Notification.Title),
+			Body:        handler.GetFromKeyDefault("body", handler.conf.Notification.Body),
+			Icon:        handler.GetFromKeyDefault("icon", handler.conf.Notification.Icon),
+			ClickAction: handler.GetFromKeyDefault("click_action", handler.conf.Notification.Uri),
 		},
 	}
 }
 
 // Get Message Content with type eq MessageStand
-func getStand(handler *handler) *fcm.Message  {
-	var msg  fcm.Message
+func getStand(handler *handler) *fcm.Message {
+	var msg fcm.Message
 	//remove type first
 	var b *bytes.Buffer
 	if handler.types == FromTypeJson {
 		b, _ = interfaceToByteArray(handler.raw)
-	}else {
+	} else {
 		b, _ = interfaceToByteArray(handler.from)
 	}
 	json.Unmarshal(b.Bytes(), msg)
 	return &msg
 }
-
