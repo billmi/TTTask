@@ -95,7 +95,7 @@ func (fcmMsg *FcmMsg) Task() {
 }
 func (fcmMsg *FcmMsg) Run() {
 	response, err := fcmMsg.Send()
-	taskEntity = append(taskEntity, &task{fcmMsg, response})
+	//taskEntity = append(taskEntity, &task{fcmMsg, response})
 
 	//todo: need delete send task
 	//entities := GetTask().Entries()
