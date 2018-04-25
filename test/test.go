@@ -6,7 +6,6 @@ import (
 	"reflect"
 	"fmt"
 	msg2 "github.com/lwl1989/TTTask/msg"
-	"github.com/lwl1989/TTTask/tick"
 )
 
 func New(sample interface{}) interface{} {
@@ -27,8 +26,7 @@ func getMessage() *fcm.Message  {
 var config1 *msg2.ApiConfig
 
 func main() {
-	tick.TestTick()
-	return
+
 	config1 = msg2.GetConfig("/www/go_path/src/github.com/lwl1989/TTTask/conf/config.json")
 	f := getMessage()
 	ff := msg2.GetNewFcm()
