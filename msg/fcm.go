@@ -95,23 +95,13 @@ func (fcmMsg *FcmMsg) Task() {
 }
 func (fcmMsg *FcmMsg) Run() {
 	response, err := fcmMsg.Send()
-	//taskEntity = append(taskEntity, &task{fcmMsg, response})
+	msgId = strconv.FormatInt(response.MessageID, 10)
 
-	//todo: need delete send task
-	//entities := GetTask().Entries()
-	//fmt.Println(entities)
-	//for k,entity := range entities {
-	//	f := entity.Job.(*FcmMsg)
-	//	if f.sendTime < time.Now().Unix() {
-	//		entities = append(entities[0:k], entities[k+1:]...)
-	//		break
-	//	}
-	//}
-	//
-	//fmt.Println(entities)
-
-	// and add task list restful
 	status := 200
+	if response.Failure > 0 {
+		status = 500;
+	}
+	
 	if err != nil {
 		status = 500
 	}
