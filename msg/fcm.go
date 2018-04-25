@@ -8,7 +8,6 @@ import (
 	"bytes"
 	"strings"
 	"fmt"
-	"strconv"
 )
 
 // FcmMsg struct
@@ -96,7 +95,6 @@ func (fcmMsg *FcmMsg) Task() {
 }
 func (fcmMsg *FcmMsg) Run() {
 	response, err := fcmMsg.Send()
-	msgId := strconv.FormatInt(response.MessageID, 10)
 
 	status := 200
 	if response.Failure > 0 {
