@@ -3,11 +3,10 @@ go fcm http proxy
 
 ## reference library
 
-Thanks for their selfless contribution.
+Thanks
 
 [appleboy/go-fcm](github.com/appleboy/go-fcm)
 
-[robfig/cron](github.com/robfig/cron)
 
 ## Quick Start 
 

@@ -2,37 +2,25 @@ package msg
 
 import (
 	"sync"
-	"github.com/robfig/cron"
-	"time"
-	"strconv"
-	"github.com/appleboy/go-fcm"
-	"log"
+	"github.com/lwl1989/timing"
 )
 
 var taskOnce sync.Once
-var job *cron.Cron
-var taskEntity []*task
-type task struct {
-	fcmMsg *FcmMsg
-	response *fcm.Response
-}
+var job *timing.OnceCron
 
-func GetTask() *cron.Cron  {
+
+func GetTask() *timing.OnceCron  {
 	taskOnce.Do(func() {
-		job = cron.New()
-		//job.AddFunc("@weekly", func() {
-		//	log.Panicln("每周運行任務，保證協程不被退出")
-		//})
-		taskEntity = make([]*task,0)
+		job = timing.NewCron()
 	})
 	return job
 }
 
 func AddToTask(fcmMsg *FcmMsg)  {
-	//分 时 日 月 年
-	sendTime := time.Unix(fcmMsg.sendTime, 0)
-	spec := strconv.Itoa(sendTime.Second())+" "+strconv.Itoa(sendTime.Minute())+" "+strconv.Itoa(sendTime.Hour())+" "+strconv.Itoa(sendTime.Day())+" "+strconv.Itoa(int(sendTime.Month()))
-	log.Println("Add sendTask with time "+ spec)
-	GetTask().AddJob(spec, fcmMsg)
-	GetTask().Start()
+
+	GetTask().AddTask(&timing.Task{
+		Job:fcmMsg,
+		RunTime:fcmMsg.sendTime,
+	})
+	go GetTask().Start()
 }
