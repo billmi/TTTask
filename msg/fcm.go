@@ -95,13 +95,13 @@ func (fcmMsg *FcmMsg) Task() {
 }
 func (fcmMsg *FcmMsg) Run() {
 	response, err := fcmMsg.Send()
-	msgId = strconv.FormatInt(response.MessageID, 10)
+	msgId := strconv.FormatInt(response.MessageID, 10)
 
 	status := 200
 	if response.Failure > 0 {
 		status = 500;
 	}
-	
+
 	if err != nil {
 		status = 500
 	}
