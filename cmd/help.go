@@ -15,12 +15,12 @@ func ShowHelp()  {
 		  "api_key":"AAAA_1dLSps:APA91......ZHrCUioe-vx6wFvDXfnoh9h",
 		  "notify_callback":"http://localhost:8000/fcm/notify",
 		  "log_file":"/tmp/",
-		  "proxy":"",
+		  "proxy":"socket5 proxy url like 127.0.0.1:1080",
 		  "notification":{
 			"title":"",
 			"body":"",
-			"icon":"http://",
-			"uri":"http://"
+			"icon":"icon url like http://xxx.ico",
+			"uri":"click_action like https://www.google.com or any schema://"
 		  }
 		}`)
 	fmt.Println("")
