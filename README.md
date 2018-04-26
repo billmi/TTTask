@@ -15,23 +15,21 @@ go get github.com/lwl1989/TTTask/msg
 go build -o ttpush index.go
 
 #### show help 
-./ttpush -h show
+    sudo ./ttpush -h show
 
 #### install service
-sudo ./ttpush install
+    sudo ./ttpush install
 
 #### remove service
-sudo ./ttpush remove
+    sudo ./ttpush remove
 
 #### start
-sudo ./ttpush start
+    sudo ./ttpush start
 or
-sudo ./ttpush -c configFilePath
+    sudo ./ttpush -c configFilePath
 
 #### stop
-sudo ./ttpush stop
-
-input config file path to loading
+    sudo ./ttpush stop
 
 ## config File
 
