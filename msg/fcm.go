@@ -98,7 +98,7 @@ func (fcmMsg *FcmMsg) Run() {
 
 	status := 200
 	if response.Failure > 0 {
-		status = 500;
+		status = 500
 	}
 
 	if err != nil {
@@ -112,7 +112,9 @@ func (fcmMsg *FcmMsg) Run() {
 //try to send google
 func (fcmMsg *FcmMsg) Send() (*fcm.Response, error) {
 
-	client, err := fcm.NewClient(fcmMsg.conf.GetKey())
+	client, err := NewClient(fcmMsg.conf.GetKey())
+
+	client.SetProxy(fcmMsg.conf.Proxy)
 	if err != nil {
 		return nil, err
 	}

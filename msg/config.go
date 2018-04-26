@@ -23,7 +23,9 @@ type ApiConfig struct {
 	MaxTtl       uint
 	CallBack     string
 	LogFile      string
+	Proxy		 string
 	Notification *DefaultNotification
+	Maps 		 map[string]string
 }
 
 //load config from path
@@ -60,13 +62,19 @@ func GetConfig(path string) *ApiConfig {
 		}
 	}
 	return &ApiConfig{
-		ApiKey:       c.Get("api_key").(string),
-		ServerPort:   c.Get("server_port").(string),
+		ApiKey:       c.String("api_key"),
+		ServerPort:   c.String("server_port"),
 		MaxTtl:       uint(c.Get("max_ttl").(float64)),
 		Notification: notification,
-		CallBack:     c.Get("notify_callback").(string),
-		LogFile:      c.Get("log_file").(string),
+		CallBack:     c.String("notify_callback"),
+		LogFile:      c.String("log_file"),
+		Proxy:        c.String("proxy"),
 	}
+}
+
+//need todo
+func (conf *ApiConfig) Get(key string) string {
+	return ""
 }
 
 func (conf *ApiConfig) GetKey() string {
