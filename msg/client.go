@@ -64,13 +64,16 @@ func NewClient(apiKey string, opts ...Option) (*Client, error) {
 
 	return c, nil
 }
-func (c *Client) SetProxy(str string) {
-	if str != "" {
-		dialer, err := proxy.SOCKS5("tcp", str, nil, proxy.Direct)
+func (c *Client) SetProxy(pro string) {
+	if pro != "" {
+		dialer, err := proxy.SOCKS5("tcp", pro, nil, proxy.Direct)
 		if err == nil {
+			// setup a http client
 			httpTransport := &http.Transport{}
-			c.client.Transport = &http.Transport{}
-			httpTransport.DialTLS = dialer.Dial
+			httpClient := &http.Client{Transport: httpTransport}
+			// set our socks5 as the dialer
+			httpTransport.Dial = dialer.Dial
+			c.client = httpClient
 		}
 	}
 }
