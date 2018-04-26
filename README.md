@@ -12,9 +12,24 @@ Thanks
 
 go get github.com/lwl1989/TTTask/msg
 
-go build main.go
+go build -o ttpush index.go
 
-./index
+#### show help 
+./ttpush -h show
+
+#### install service
+sudo ./ttpush install
+
+#### remove service
+sudo ./ttpush remove
+
+#### start
+sudo ./ttpush start
+or
+sudo ./ttpush -c configFilePath
+
+#### stop
+sudo ./ttpush stop
 
 input config file path to loading
 
@@ -27,6 +42,7 @@ input config file path to loading
   "api_key":"AAAA_1dLSps:APA91......ZHrCUioe-vx6wFvDXfnoh9h",
   "notify_callback":"http://localhost:8000/fcm/notify",
   "log_file":"/tmp/",
+  "proxy":"",
   "notification":{
     "title":"",
     "body":"",

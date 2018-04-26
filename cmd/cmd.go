@@ -30,7 +30,7 @@ func (command *command) init()  {
 	flag.Parse()
 
 	if path == "" {
-		path=getCurrentDirectory()+"/conf/config.json.back"
+		path=getCurrentDirectory()+"/conf/config.json"
 	}
 
 	if daemon {
@@ -38,6 +38,7 @@ func (command *command) init()  {
 	}else{
 		command.SetAlias("d","daemon","0")
 	}
+
 	command.SetAlias("h","help",help)
 	command.SetAlias("c","config",path)
 }
@@ -45,12 +46,13 @@ func (command *command) init()  {
 func (command *command) Get(key string) string {
 	if _, ok := command.list[key]; ok {
 		return command.list[key]
-	}
-	for alias,value := range command.alias {
-		if alias == key {
-			return command.Get(value)
+	}else{
+		if _, ok := command.alias[key]; ok {
+			key = command.alias[key]
 		}
+		return command.Get(key)
 	}
+
 	return ""
 }
 
@@ -60,6 +62,6 @@ func (command *command) Set(key string, value string)  {
 
 func (command *command) SetAlias(key string, alias string, value string)  {
 	command.Set(key, value)
-	command.list[alias] = key
+	command.alias[alias] = key
 }
 

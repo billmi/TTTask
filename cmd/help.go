@@ -6,8 +6,10 @@ func ShowHelp()  {
 	fmt.Println("Welcome use Ttpush!")
 	fmt.Println("===================")
 	fmt.Println("")
-	fmt.Println("command:")
-	fmt.Printf("\t%s\n","-c :")
+	fmt.Println("Usage: command install | remove | start | stop | status")
+	fmt.Println("")
+	fmt.Println("parmas:")
+	fmt.Printf("\t%s\n","-c <filepath>:")
 	fmt.Printf("\t\t%s\n","input config file path,content like this:")
 	fmt.Printf("\t\t%s\n",`{
 		  "server_port":"8080",
@@ -24,9 +26,9 @@ func ShowHelp()  {
 		  }
 		}`)
 	fmt.Println("")
-	fmt.Printf("\t%s\n","-h :")
+	fmt.Printf("\t%s\n","-h <show>:")
 	fmt.Printf("\t\t%s\n","help command and list commands")
 	fmt.Println("")
-	fmt.Printf("\t%s\n","-d :")
+	fmt.Printf("\t%s\n","-d <bool>:")
 	fmt.Printf("\t\t%s\n","true or false set It's daemon?")
 }

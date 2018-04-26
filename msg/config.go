@@ -35,7 +35,7 @@ func GetConfig(path string) *ApiConfig {
 	c, err := conf.NewLoader().Argv().Env().File(path).Load()
 
 	if err != nil {
-		panic("load config err")
+		panic("load config err "+path)
 	}
 
 	maps := c.Get("notification").(map[string]interface{})

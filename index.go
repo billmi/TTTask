@@ -1,10 +1,11 @@
 package main
 
 import (
-	"net/http"
 	"github.com/lwl1989/TTTask/msg"
 	"fmt"
 	"github.com/lwl1989/TTTask/cmd"
+	"github.com/takama/daemon"
+	"log"
 )
 
 var config *msg.ApiConfig
@@ -14,6 +15,7 @@ func main() {
 
 	h := c.Get("help")
 	path := c.Get("config")
+
 	if h != "" {
 		cmd.ShowHelp()
 		return
@@ -24,10 +26,17 @@ func main() {
 		return
 	}
 
-	config = msg.GetConfig(path)
-	fmt.Println("load config success")
-	handler := msg.GetHandle()
-	handler.SetConfig(config)
-	http.ListenAndServe(":"+config.GetServerPort(), handler)
 
+	config = msg.GetConfig(path)
+
+	srv, err := daemon.New("ttpush", "ttpush fcm proxy service")
+	if err != nil {
+		log.Fatalln("Error: ", err)
+	}
+	service := &cmd.Service{ Daemon:srv,Config:config }
+	status, err := service.Manage()
+	if err != nil {
+		log.Fatalln(status, "\nError: ", err)
+	}
+	fmt.Println(status)
 }
